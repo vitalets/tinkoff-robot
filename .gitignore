@@ -9,6 +9,5 @@ npm-debug.log
 .env*
 
 dist
+data
 /todo.txt
-/scripts/check.ts
-

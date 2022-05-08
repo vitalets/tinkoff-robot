@@ -9,5 +9,5 @@
     "moduleResolution": "node",
     "esModuleInterop": true
   },
-  "include": [ "src", "test" ]
+  "include": [ "src", "scripts" ]
 }
