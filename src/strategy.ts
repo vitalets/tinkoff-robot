@@ -13,16 +13,18 @@ import { RobotModule } from './base.js';
 export type StrategyResult = 'buy' | 'sell';
 
 export class Strategy extends RobotModule {
+  // eslint-disable-next-line max-statements
   run(candles: HistoricCandle[]) {
+    const { time } = candles[candles.length - 1];
     const closePrices = candles.map(candle => Helpers.toNumber(candle.close!));
     const fastMa = ema(closePrices, this.config.fastLength);
     const slowMa = ema(closePrices, this.config.slowLength);
     if (crossover(fastMa, slowMa)) {
-      this.logger.warn('Цена начинает расти, сигнал к покупке');
+      this.logger.warn(time, 'Цена начинает расти, сигнал к покупке');
       return 'buy';
     }
     if (crossunder(fastMa, slowMa)) {
-      this.logger.warn('Цена начинает падать, сигнал к продаже');
+      this.logger.warn(time, 'Цена начинает падать, сигнал к продаже');
       return 'sell';
     }
     this.logger.log('Тренд не меняется, ничего не делаем');

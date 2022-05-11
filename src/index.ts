@@ -46,7 +46,7 @@ export class Robot {
    * Разовый запуск робота на текущих данных.
    */
   async tick() {
-    this.logger.warn(`Запуск робота для счета: ${this.account.accountId}`);
+    this.logger.log(`Запуск робота для ${this.config.useRealAccount ? 'БОЕВОГО счета' : 'счета в песочнице'}`);
     await this.market.loadInstrumentState();
     if (!this.market.isTradingAvailable()) return;
     await this.market.loadCandles();
@@ -64,7 +64,7 @@ export class Robot {
   private async buy(position?: PortfolioPosition) {
     const existingLots = this.api.helpers.toNumber(position?.quantityLots) || 0;
     if (existingLots > 0) {
-      this.logger.log(`Позиция уже в портфеле, лотов: ${existingLots}. Ждем сигнала к продаже...`);
+      this.logger.warn(`Позиция уже в портфеле, лотов: ${existingLots}. Ждем сигнала к продаже...`);
       return;
     }
 
@@ -73,7 +73,7 @@ export class Robot {
     const orderPrice = currentPrice * this.config.orderLots * lotSize;
     const balance = this.protfolio.getBalance();
     if (orderPrice > balance) {
-      this.logger.log(`Недостаточно средств для покупки: ${orderPrice} > ${balance}`);
+      this.logger.warn(`Недостаточно средств для покупки: ${orderPrice} > ${balance}`);
       return;
     }
 
@@ -87,7 +87,7 @@ export class Robot {
   private async sell(position?: PortfolioPosition) {
     const existingLots = this.api.helpers.toNumber(position?.quantityLots) || 0;
     if (!position || existingLots === 0) {
-      this.logger.log(`Позиции в портфеле нет. Ждем сигнала к покупке...`);
+      this.logger.warn(`Позиции в портфеле нет. Ждем сигнала к покупке...`);
       return;
     }
 
@@ -97,7 +97,7 @@ export class Robot {
 
     // Если мы в плюсе, либо в большом минусе, продаем по текущей цене
     if (profit > 0 || isStopLoss) {
-      this.logger.log(`Продаем с профитом ${profit}%`);
+      this.logger.warn(`Продаем с профитом ${profit}%`);
       await this.orders.postOrder({
         direction: OrderDirection.ORDER_DIRECTION_SELL,
         quantity: existingLots,

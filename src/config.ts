@@ -17,9 +17,9 @@ export const config = {
   /** Кол-во лотов в заявке */
   orderLots: 1,
   /** Кол-во точек для расчета быстрого тренда */
-  fastLength: 20,
+  fastLength: 10,
   /** Кол-во точек для расчета медленного тренда */
-  slowLength: 50,
+  slowLength: 30,
   /** Интервал свечей */
   interval: CandleInterval.CANDLE_INTERVAL_1_MIN,
 };
