@@ -1,5 +1,5 @@
 /**
- * Работа с данными рынка.
+ * Класс работы с данными рынка.
  */
 import { SecurityTradingStatus } from 'tinkoff-invest-api/dist/generated/common.js';
 import { Instrument, InstrumentIdType } from 'tinkoff-invest-api/dist/generated/instruments.js';
@@ -54,6 +54,13 @@ export class Market extends RobotModule {
   getCurrentPrice() {
     const close = this.candles[ this.candles.length - 1 ].close!;
     return this.api.helpers.toNumber(close);
+  }
+
+  /**
+   * Лотность.
+   */
+  getLotSize() {
+    return this.instrument?.lot || 0;
   }
 }
 

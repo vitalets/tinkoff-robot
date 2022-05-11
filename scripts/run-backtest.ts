@@ -10,6 +10,7 @@ const backtest = new Backtest({
   candles: 'data/candles_BBG004730N88.json',
   instruments: { shares: 'data/shares.json'},
   initialCandleIndex: 50,
+  initialCapital: 100_000,
 });
 
 main();
@@ -20,6 +21,8 @@ async function main() {
   while (await backtest.tick()) {
     await robot.tick();
   }
-  console.log(await backtest.api.operations.getPortfolio({ accountId: '' }));
-  console.log(`Done.`);
+  const capital = await backtest.getCapital();
+  const precent = 100 * (capital - backtest.options.initialCapital) / backtest.options.initialCapital
+  console.log(`Капитал: ${capital} (${precent.toFixed(2)}%)`);
 }
+

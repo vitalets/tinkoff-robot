@@ -18,21 +18,13 @@ export class Portfolio extends RobotModule {
     this.logPositions();
   }
 
-  // private getFigiPosition() {
-  //   return this.positions.find(p => p.figi === this.config.figi);
-  // }
+  getPosition() {
+    return this.positions.find(p => p.figi === this.config.figi);
+  }
 
-  // /**
-  //  * Профит в % за 1 инструмент при продаже по текущей цене (с учетом комиссий).
-  //  * Вычисляется относительно цены покупки.
-  //  */
-  // private getCurrentProfit(position: PortfolioPosition) {
-  //   const buyPrice = Helpers.toNumber(position.averagePositionPrice!);
-  //   const sellPrice = this.getCurrentPrice();
-  //   const brokerFee = (buyPrice + sellPrice) * this.config.brokerFee / 100;
-  //   const profit = sellPrice - buyPrice - brokerFee;
-  //   return 100 * profit / buyPrice;
-  // }
+  getBalance() {
+    return this.api.helpers.toNumber(this.portfolio?.totalAmountCurrencies) || 0;
+  }
 
   private logPositions() {
     this.logger.log(`Позиции загружены: ${this.positions.length}`);
@@ -40,8 +32,7 @@ export class Portfolio extends RobotModule {
       const s = [
         ' '.repeat(4),
         p.figi,
-        `(${p.instrumentType}, ${this.api.helpers.toNumber(p.quantity)})`,
-        `${this.api.helpers.toNumber(p.averagePositionPrice)} -> ${this.api.helpers.toNumber(p.currentPrice)}`,
+        `${this.api.helpers.toNumber(p.quantity)} x ${this.api.helpers.toNumber(p.averagePositionPrice)}`,
         `(${this.api.helpers.toNumber(p.expectedYield)} ${p.currentPrice?.currency})`,
       ].join(' ');
       this.logger.log(s);

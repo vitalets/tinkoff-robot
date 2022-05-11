@@ -1,8 +1,14 @@
 /**
  * Класс работы с заявками.
  */
-
-import { OrderDirection, OrderExecutionReportStatus, OrderState } from 'tinkoff-invest-api/dist/generated/orders.js';
+import { randomUUID } from 'crypto';
+import {
+  OrderDirection,
+  OrderExecutionReportStatus,
+  OrderState,
+  OrderType,
+  PostOrderRequest
+} from 'tinkoff-invest-api/dist/generated/orders.js';
 import { RobotModule } from './base.js';
 
 export class Orders extends RobotModule {
@@ -17,41 +23,36 @@ export class Orders extends RobotModule {
     this.logItems();
   }
 
-  // async postOrder(direction: OrderDirection) {
-  //   const currentPrice = this.getCurrentPrice();
-  //   const lots = this.config.orderLots;
+  /**
+   * Создаем новую лимит-заявку
+   */
+  async postOrder({ direction, quantity, price }: Pick<PostOrderRequest, 'direction' | 'quantity' | 'price'>) {
+    const order = await this.account.postOrder({
+      figi: this.config.figi,
+      quantity,
+      direction,
+      price,
+      orderType: OrderType.ORDER_TYPE_LIMIT,
+      orderId: randomUUID(),
+    });
+    const action = direction === OrderDirection.ORDER_DIRECTION_BUY ? 'покупку' : 'продажу';
+    this.logger.warn(`Создана заявка на ${action}: лотов ${quantity}, цена ${this.api.helpers.toNumber(price)}`);
+    return order;
+    // console.log(order); // check initial comission
+  }
 
-  //   if (direction === OrderDirection.ORDER_DIRECTION_BUY) {
-  //     const orderPrice = currentPrice * lots * (this.instrument?.lot || 0);
-  //     const balance = Helpers.toNumber(this.portfolio?.totalAmountCurrencies) || 0;
-  //     if (orderPrice > balance) {
-  //       this.logger.log(`Недостаточно средств для покупки: ${orderPrice} > ${balance}`);
-  //       return;
-  //     }
-  //   }
-
-  //   const order = await this.account.postOrder({
-  //     figi: this.config.figi,
-  //     quantity: 1,
-  //     direction,
-  //     price: Helpers.toQuotation(currentPrice),
-  //     orderType: OrderType.ORDER_TYPE_LIMIT,
-  //     orderId: randomUUID(),
-  //   });
-  //   const action = direction === OrderDirection.ORDER_DIRECTION_BUY ? 'покупку' : 'продажу';
-  //   this.logger.log(`Создана заявка на ${action}: ${currentPrice}`);
-  //   console.log(order); // check initial comission
-  // }
-
-  // async cancelExistingOrder(direction: OrderDirection) {
-  //   // Если есть текущая заявка по данному инструменту, отменяем - чтобы пересоздать с актуальной ценой
-  //   // todo: на всякий случай отменять все заявки с данным figi?
-  //   const existingOrder = this.orders.find(order => order.figi === this.config.figi && order.direction === direction);
-  //   if (existingOrder?.executionReportStatus === OrderExecutionReportStatus.EXECUTION_REPORT_STATUS_NEW) {
-  //     this.logger.log(`Отмена предыдущей заявки: ${existingOrder.figi} ${Helpers.toNumber(existingOrder.initialSecurityPrice)}`);
-  //     await this.account.cancelOrder(existingOrder.orderId);
-  //   }
-  // }
+  /**
+   * Отменяем все существующие заявки для данного figi.
+   */
+  async cancelExistingOrders() {
+    const existingOrders = this.items.filter(order => order.figi === this.config.figi);
+    const tasks = existingOrders.map(async order => {
+      const prevPrice = this.api.helpers.toNumber(order.initialSecurityPrice);
+      this.logger.log(`Отмена предыдущей заявки ${order.orderId}, цена ${prevPrice}`);
+      await this.account.cancelOrder(order.orderId);
+    });
+    await Promise.all(tasks);
+  }
 
   private logItems() {
     this.logger.log(`Заявки загружены: ${this.items.length}`);

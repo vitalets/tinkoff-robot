@@ -1,5 +1,5 @@
 /**
- * Конфигурация
+ * Конфигурация.
  */
 import { CandleInterval } from 'tinkoff-invest-api/dist/generated/marketdata.js';
 

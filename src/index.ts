@@ -1,19 +1,15 @@
 /**
- * Запуск робота.
+ * Входная точка для торгового робота на Тинькофф АПИ.
  */
+/* eslint-disable max-statements */
 import 'dotenv/config';
 import { RealAccount, SandboxAccount, TinkoffAccount, TinkoffInvestApi } from 'tinkoff-invest-api';
 import { Helpers } from 'tinkoff-invest-api/dist/helpers.js';
 import { Logger } from '@vitalets/logger';
 import { Strategy } from './strategy.js';
-import { OrderDirection, OrderExecutionReportStatus, OrderState, OrderType } from 'tinkoff-invest-api/dist/generated/orders.js';
+import { OrderDirection } from 'tinkoff-invest-api/dist/generated/orders.js';
 import { Config } from './config.js';
-import { HistoricCandle } from 'tinkoff-invest-api/dist/generated/marketdata';
-import { PortfolioPosition, PortfolioResponse } from 'tinkoff-invest-api/dist/generated/operations';
-import { randomUUID } from 'crypto';
-import { sleep } from './utils.js';
-import { Instrument, InstrumentIdType } from 'tinkoff-invest-api/dist/generated/instruments.js';
-import { SecurityTradingStatus } from 'tinkoff-invest-api/dist/generated/common.js';
+import { PortfolioPosition } from 'tinkoff-invest-api/dist/generated/operations';
 import { Market } from './market.js';
 import { Orders } from './orders.js';
 import { Portfolio } from './portfolio.js';
@@ -21,12 +17,13 @@ import { Portfolio } from './portfolio.js';
 const { REAL_ACCOUNT_ID = '', SANDBOX_ACCOUNT_ID = '' } = process.env;
 
 export class Robot {
-  public account: TinkoffAccount;
-  protected logger = new Logger({ prefix: '[robot]:' });
-  protected market = new Market(this);
-  protected strategy = new Strategy(this);
-  protected orders = new Orders(this);
-  protected protfolio = new Portfolio(this);
+  account: TinkoffAccount;
+  market = new Market(this);
+  strategy = new Strategy(this);
+  orders = new Orders(this);
+  protfolio = new Portfolio(this);
+
+  private logger = new Logger({ prefix: '[robot]:' });
 
   constructor(public api: TinkoffInvestApi, public config: Config) {
     this.account = config.useRealAccount
@@ -49,51 +46,81 @@ export class Robot {
    * Разовый запуск робота на текущих данных.
    */
   async tick() {
+    this.logger.warn(`Запуск робота для счета: ${this.account.accountId}`);
     await this.market.loadInstrumentState();
     if (!this.market.isTradingAvailable()) return;
     await this.market.loadCandles();
-    const action = this.runStrategy();
+    const action = this.strategy.run(this.market.candles);
     if (action) {
       await this.orders.load();
+      await this.orders.cancelExistingOrders();
       await this.protfolio.load();
+      const position = this.protfolio.getPosition();
+      if (action === 'buy') await this.buy(position);
+      if (action === 'sell') await this.sell(position);
     }
-    // if (action === 'buy') await this.buy();
-    // if (action === 'sell') await this.sell();
   }
 
-  private runStrategy() {
-    return this.strategy.run(this.market.candles);
-  }
-  // private async buy() {
-  //   await this.loadOrders();
-  //   await this.cancelExistingOrder(OrderDirection.ORDER_DIRECTION_BUY);
-  //   await this.loadPortfolio();
-  //   const position = this.getFigiPosition();
-  //   const lots = Helpers.toNumber(position?.quantityLots);
-  //   if (lots) {
-  //     this.logger.log(`Позиция уже куплена, лотов: ${lots}. Ждем сигнала к продаже...`);
-  //   } else {
-  //     await this.postOrder(OrderDirection.ORDER_DIRECTION_BUY);
-  //   }
-  // }
+  private async buy(position?: PortfolioPosition) {
+    const existingLots = this.api.helpers.toNumber(position?.quantityLots) || 0;
+    if (existingLots > 0) {
+      this.logger.log(`Позиция уже в портфеле, лотов: ${existingLots}. Ждем сигнала к продаже...`);
+      return;
+    }
 
-  // private async sell() {
-  //   await this.loadOrders();
-  //   await this.cancelExistingOrder(OrderDirection.ORDER_DIRECTION_SELL);
-  //   await this.loadPortfolio();
-  //   const position = this.getFigiPosition();
-  //   const lots = Helpers.toNumber(position?.quantityLots);
-  //   if (!position || !lots) {
-  //     this.logger.log(`Позиции в портфеле нет. Ждем сигнала к покупке...`);
-  //     return;
-  //   }
-  //   const profit = this.getCurrentProfit(position);
-  //   // Если мы в плюсе либо большом минусе, продаем по текущей цене
-  //   if (profit > 0 || profit < this.config.stopLossPercent) {
-  //     await this.postOrder(OrderDirection.ORDER_DIRECTION_SELL);
-  //   }
-  //   // todo: Если мы в небольшом минусе, то пробуем продать по цене, по которой будем в плюсе (если влезет в лимиты стакана)
-  // }
+    const currentPrice = this.market.getCurrentPrice();
+    const lotSize = this.market.getLotSize();
+    const orderPrice = currentPrice * this.config.orderLots * lotSize;
+    const balance = this.protfolio.getBalance();
+    if (orderPrice > balance) {
+      this.logger.log(`Недостаточно средств для покупки: ${orderPrice} > ${balance}`);
+      return;
+    }
+
+    await this.orders.postOrder({
+      direction: OrderDirection.ORDER_DIRECTION_BUY,
+      quantity: this.config.orderLots,
+      price: this.api.helpers.toQuotation(currentPrice),
+    });
+  }
+
+  private async sell(position?: PortfolioPosition) {
+    const existingLots = this.api.helpers.toNumber(position?.quantityLots) || 0;
+    if (!position || existingLots === 0) {
+      this.logger.log(`Позиции в портфеле нет. Ждем сигнала к покупке...`);
+      return;
+    }
+
+    const currentPrice = this.market.getCurrentPrice();
+    const profit = this.calcCurrentProfit(position, currentPrice);
+    const isStopLoss = profit < -this.config.stopLossPercent;
+
+    // Если мы в плюсе, либо в большом минусе, продаем по текущей цене
+    if (profit > 0 || isStopLoss) {
+      this.logger.log(`Продаем с профитом ${profit}%`);
+      await this.orders.postOrder({
+        direction: OrderDirection.ORDER_DIRECTION_SELL,
+        quantity: existingLots,
+        price: this.api.helpers.toQuotation(currentPrice),
+      });
+    }
+
+    // todo: Если мы в небольшом минусе, то пробуем продать по цене,
+    // по которой будем в плюсе (если влезет в лимиты стакана)
+  }
+
+  /**
+   * Расчет профита в % за 1 инструмент при продаже по текущей цене (с учетом комиссий).
+   * Вычисляется относительно цены покупки.
+   */
+  private calcCurrentProfit(position: PortfolioPosition, currentPrice: number) {
+    const buyPrice = Helpers.toNumber(position.averagePositionPrice!);
+    const comission = (buyPrice + currentPrice) * this.config.brokerFee / 100;
+    const profit = currentPrice - buyPrice - comission;
+    return 100 * profit / buyPrice;
+  }
 }
 
-
+async function sleep(minutes: number) {
+  return new Promise(resolve => setTimeout(resolve, minutes * 60 * 1000));
+}

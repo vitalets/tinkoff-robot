@@ -19,7 +19,7 @@
   "dependencies": {
     "@debut/indicators": "^1.3.3",
     "@vitalets/logger": "^2.1.1",
-    "tinkoff-invest-api": "^2.0.2"
+    "tinkoff-invest-api": "^2.0.3"
   },
   "devDependencies": {
     "@types/mocha": "^9.1.0",
