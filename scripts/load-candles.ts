@@ -13,7 +13,8 @@ const { from, to } = api.helpers.fromTo('1d', new Date('2022-05-06T10:00:00+03:0
 main();
 
 async function main() {
-  const data = await api.marketdata.getCandles({ figi, interval, from, to });
-  fs.writeFileSync(`data/candles_${figi}.json`, JSON.stringify(data, null, 2));
-  console.log('Candles saved', data.candles.length);
+  const { candles } = await api.marketdata.getCandles({ figi, interval, from, to });
+  const file = `data/candles_${figi}.json`;
+  fs.writeFileSync(file, JSON.stringify(candles, null, 2));
+  console.log('Candles saved', candles.length, `to ${file}`);
 }

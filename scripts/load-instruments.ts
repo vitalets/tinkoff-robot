@@ -9,7 +9,8 @@ import { InstrumentStatus } from 'tinkoff-invest-api/dist/generated/instruments.
 main();
 
 async function main() {
-  const data = await api.instruments.shares({ instrumentStatus: InstrumentStatus.INSTRUMENT_STATUS_BASE });
-  fs.writeFileSync(`data/shares.json`, JSON.stringify(data, null, 2));
-  console.log('Instruments saved', data.instruments.length);
+  const { instruments } = await api.instruments.shares({ instrumentStatus: InstrumentStatus.INSTRUMENT_STATUS_BASE });
+  const file = `data/shares.json`;
+  fs.writeFileSync(file, JSON.stringify(instruments, null, 2));
+  console.log('Instruments saved', instruments.length, `to ${file}`);
 }
