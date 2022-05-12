@@ -5,7 +5,7 @@
 import 'dotenv/config';
 import { RealAccount, SandboxAccount, TinkoffAccount, TinkoffInvestApi } from 'tinkoff-invest-api';
 import { Helpers } from 'tinkoff-invest-api/dist/helpers.js';
-import { Logger } from '@vitalets/logger';
+import { Logger, LogLevel } from '@vitalets/logger';
 import { Strategy } from './strategy.js';
 import { OrderDirection } from 'tinkoff-invest-api/dist/generated/orders.js';
 import { Config } from './config.js';
@@ -23,7 +23,10 @@ export class Robot {
   orders = new Orders(this);
   protfolio = new Portfolio(this);
 
-  private logger = new Logger({ prefix: '[robot]:' });
+  private logger = new Logger({
+    prefix: '[robot]:',
+    level: this.config.logLevel as LogLevel
+  });
 
   constructor(public api: TinkoffInvestApi, public config: Config) {
     this.account = config.useRealAccount

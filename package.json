@@ -4,7 +4,7 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "lint": "eslint src test --ext .ts",
+    "lint": "eslint src scripts --ext .ts",
     "tsc": "tsc --noEmit",
     "accounts": "ts-node-esm scripts/show-accounts.ts",
     "candles": "ts-node-esm scripts/load-candles.ts",
@@ -14,12 +14,12 @@
     "market:real": "ts-node-esm scripts/run-market.ts --real"
   },
   "lint-staged": {
-    "{src,test}/**/*.ts": "eslint --ext .ts"
+    "{src,scripts}/**/*.ts": "eslint --ext .ts"
   },
   "dependencies": {
     "@debut/indicators": "^1.3.3",
     "@vitalets/logger": "^2.1.1",
-    "tinkoff-invest-api": "^2.0.4"
+    "tinkoff-invest-api": "^2.0.5"
   },
   "devDependencies": {
     "@types/mocha": "^9.1.0",

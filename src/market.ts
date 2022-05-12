@@ -40,7 +40,7 @@ export class Market extends RobotModule {
    */
   async loadCandles() {
     const { figi, interval } = this.config;
-    this.logger.log(`Загружаю свежие свечи для ${figi} ...`);
+    this.logger.log(`Загружаю свежие свечи для ${this.instrument?.ticker} ...`);
     // const { from, to } = Helpers.fromTo(getTimeOffset());
     const { from, to } = this.api.helpers.fromTo('-1d');
     const { candles } = await this.api.marketdata.getCandles({ figi, interval, from, to });

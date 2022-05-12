@@ -11,3 +11,4 @@ npm-debug.log
 dist
 data
 /todo.txt
+/scripts/run-tuner.ts

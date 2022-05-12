@@ -7,9 +7,9 @@ import { api } from './init-api.js';
 import { CandleInterval } from 'tinkoff-invest-api/dist/generated/marketdata.js';
 
 const figi = 'BBG004730N88';
-const interval = CandleInterval.CANDLE_INTERVAL_1_MIN;
-const startDate = '2022-05-12';
-const duration = '1d';
+const interval = CandleInterval.CANDLE_INTERVAL_DAY;
+const startDate = '2021-01-01';
+const duration = '365d';
 const { from, to } = api.helpers.fromTo(duration, new Date(`${startDate}T10:00:00+03:00`));
 
 main();

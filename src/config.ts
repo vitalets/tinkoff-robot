@@ -22,4 +22,6 @@ export const config = {
   slowLength: 30,
   /** Интервал свечей */
   interval: CandleInterval.CANDLE_INTERVAL_1_MIN,
+  /** Уровень логирования */
+  logLevel: 'info',
 };
