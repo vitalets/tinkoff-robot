@@ -1,7 +1,7 @@
 /**
  * Входная точка для торгового робота на Тинькофф АПИ.
  */
-/* eslint-disable max-statements */
+/* eslint-disable max-statements, complexity */
 import 'dotenv/config';
 import { RealAccount, SandboxAccount, TinkoffAccount, TinkoffInvestApi } from 'tinkoff-invest-api';
 import { Helpers } from 'tinkoff-invest-api/dist/helpers.js';
@@ -46,7 +46,7 @@ export class Robot {
    * Разовый запуск робота на текущих данных.
    */
   async tick() {
-    this.logger.log(`Запуск робота для ${this.config.useRealAccount ? 'БОЕВОГО счета' : 'счета в песочнице'}`);
+    this.logger.log(`Запуск робота (${this.config.useRealAccount ? 'боевой счет' : 'песочница'})`);
     await this.market.loadInstrumentState();
     if (!this.market.isTradingAvailable()) return;
     await this.market.loadCandles();
@@ -94,15 +94,18 @@ export class Robot {
     const currentPrice = this.market.getCurrentPrice();
     const profit = this.calcCurrentProfit(position, currentPrice);
     const isStopLoss = profit < -this.config.stopLossPercent;
+    const profitMsg = `Расчетная маржа: ${profit > 0 ? '+' : ''}${profit.toFixed(2)}%`;
 
     // Если мы в плюсе, либо в большом минусе, продаем по текущей цене
     if (profit > 0 || isStopLoss) {
-      this.logger.warn(`Продаем с профитом ${profit}%`);
+      this.logger.warn(`${profitMsg}, продаем!`);
       await this.orders.postOrder({
         direction: OrderDirection.ORDER_DIRECTION_SELL,
         quantity: existingLots,
         price: this.api.helpers.toQuotation(currentPrice),
       });
+    } else {
+      this.logger.warn(`${profitMsg}, пока держим`);
     }
 
     // todo: Если мы в небольшом минусе, то пробуем продать по цене,

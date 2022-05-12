@@ -16,9 +16,9 @@ export function sma(prices: Series, length: number) {
 /**
  * Экспоненциальное скользящее среднее, EMA
  */
- export function ema(prices: Series, length: number) {
-  const sma = new EMA(length);
-  return prices.map(price => sma.nextValue(price));
+export function ema(prices: Series, length: number) {
+  const ema = new EMA(length);
+  return prices.map(price => ema.nextValue(price));
 }
 
 /**
@@ -36,5 +36,5 @@ export function crossover(source1: Series, source2: Series) {
 export function crossunder(source1: Series, source2: Series) {
   const [ prev1, cur1 ] = source1.slice(-2);
   const [ prev2, cur2 ] = source2.slice(-2);
-  return cur1 > cur2 && prev1 < prev2;
+  return cur1 < cur2 && prev1 > prev2;
 }
