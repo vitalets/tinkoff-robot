@@ -4,6 +4,7 @@
  */
 import { RealAccount, SandboxAccount, TinkoffAccount } from 'tinkoff-invest-api';
 import { Operation, OperationState, PortfolioPosition, PortfolioResponse } from 'tinkoff-invest-api/dist/generated/operations.js';
+import { OrderDirection, OrderExecutionReportStatus, OrderState } from 'tinkoff-invest-api/dist/generated/orders.js';
 import { Account } from 'tinkoff-invest-api/dist/generated/users.js';
 import { api } from './init-api.js';
 
@@ -23,7 +24,8 @@ async function showAccount(a: Account) {
   const account = isReal ? new RealAccount(api, a.id) : new SandboxAccount(api, a.id);
   const portfolio = await account.getPortfolio();
   showAccountHeader(account, portfolio);
-  // console.log(JSON.stringify(portfolio.positions, null, 2))
+  const { orders } = await account.getOrders();
+  for (const order of orders) showOrder(order);
   for (const position of portfolio.positions) {
     showPosition(position);
     await showOperations(account, position);
@@ -33,9 +35,24 @@ async function showAccount(a: Account) {
 function showAccountHeader(account: TinkoffAccount, p: PortfolioResponse) {
   const s = [
     account.accountId,
-    api.helpers.toNumber(p.totalAmountShares),
-    p.totalAmountShares?.currency,
+    `currency: ${api.helpers.toNumber(p.totalAmountCurrencies)},`,
+    `shares: ${api.helpers.toNumber(p.totalAmountShares)}`,
     p.expectedYield && `(${api.helpers.toNumber(p.expectedYield)}%)`,
+  ].join(' ');
+  console.log(s);
+}
+
+function showOrder(order: OrderState) {
+  const s = [
+    `${' '.repeat(4)}*`,
+    OrderDirection[order.direction].replace('ORDER_DIRECTION_', ''),
+    order.figi,
+    OrderExecutionReportStatus[order.executionReportStatus].replace('EXECUTION_REPORT_', ''),
+    `${order.lotsRequested} lot(s) x`,
+    `${api.helpers.toMoneyString(order.initialSecurityPrice)} =`,
+    `${api.helpers.toMoneyString(order.initialOrderPrice)},`,
+    `(fee ${api.helpers.toMoneyString(order.initialCommission)}),`,
+    order.orderId,
   ].join(' ');
   console.log(s);
 }
@@ -64,8 +81,9 @@ async function showOperations(account: RealAccount | SandboxAccount, { figi }: P
       ' '.repeat(8),
       o.date?.toLocaleString(),
       o.type,
-      o.quantity > 0 && `(${o.quantity})`,
-      `${api.helpers.toNumber(o.payment)} ${o.payment?.currency}`,
+      o.quantity > 0 && `${o.quantity} lot(s) x`,
+      o.quantity > 0 && `${api.helpers.toMoneyString(o.price)} =`,
+      `${api.helpers.toMoneyString(o.payment)}`,
       getFeePercent(o, operations),
     ].filter(Boolean).join(' ');
     console.log(s);
@@ -77,7 +95,7 @@ function getFeePercent({ parentOperationId, payment }: Operation, operations: Op
   if (parentOperation) {
     const parentPayment = api.helpers.toNumber(parentOperation.payment)!;
     const ownPayment = api.helpers.toNumber(payment)!;
-    const percent = 100 * ownPayment / parentPayment;
+    const percent = Math.abs(100 * ownPayment / parentPayment);
     return `(${percent.toFixed(2)}%)`;
   }
 }
