@@ -9,7 +9,9 @@ import {
   OrderType,
   PostOrderRequest
 } from 'tinkoff-invest-api/dist/generated/orders.js';
-import { RobotModule } from './base.js';
+import { RobotModule } from '../utils/robot-module.js';
+
+export type LimitOrderReq = Pick<PostOrderRequest, 'figi' | 'direction' | 'quantity' | 'price'>;
 
 export class Orders extends RobotModule {
   items: OrderState[] = [];
@@ -26,9 +28,9 @@ export class Orders extends RobotModule {
   /**
    * Создаем новую лимит-заявку
    */
-  async postOrder({ direction, quantity, price }: Pick<PostOrderRequest, 'direction' | 'quantity' | 'price'>) {
+  async postLimitOrder({ figi, direction, quantity, price }: LimitOrderReq) {
     const order = await this.account.postOrder({
-      figi: this.config.figi,
+      figi,
       quantity,
       direction,
       price,
@@ -38,14 +40,13 @@ export class Orders extends RobotModule {
     const action = direction === OrderDirection.ORDER_DIRECTION_BUY ? 'покупку' : 'продажу';
     this.logger.warn(`Создана заявка на ${action}: лотов ${quantity}, цена ${this.api.helpers.toNumber(price)}`);
     return order;
-    // console.log(order); // check initial comission
   }
 
   /**
    * Отменяем все существующие заявки для данного figi.
    */
-  async cancelExistingOrders() {
-    const existingOrders = this.items.filter(order => order.figi === this.config.figi);
+  async cancelExistingOrders(figi: string) {
+    const existingOrders = this.items.filter(order => order.figi === figi);
     const tasks = existingOrders.map(async order => {
       const prevPrice = this.api.helpers.toNumber(order.initialSecurityPrice);
       this.logger.log(`Отмена предыдущей заявки ${order.orderId}, цена ${prevPrice}`);

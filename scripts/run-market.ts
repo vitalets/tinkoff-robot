@@ -8,7 +8,7 @@
  * npx ts-node-esm scripts/run-market.ts --real
  */
 import { api } from './init-api.js';
-import { Robot } from '../src/index.js';
+import { Robot } from '../src/robot.js';
 import { config } from '../src/config.js';
 
 const useRealAccount = process.argv.some(a => a === '--real');
@@ -19,5 +19,12 @@ main();
 async function main() {
   const finalConfig = { ...config, useRealAccount };
   const robot = new Robot(api, finalConfig);
-  await robot.run(intervalMinutes);
+  while (true) {
+    await robot.runOnce();
+    await sleep(intervalMinutes);
+  }
+}
+
+async function sleep(minutes: number) {
+  return new Promise(resolve => setTimeout(resolve, minutes * 60 * 1000));
 }

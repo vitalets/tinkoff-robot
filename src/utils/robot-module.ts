@@ -2,17 +2,18 @@
  * Базовый класс для дочерних модулей робота.
  */
 import { Logger, LogLevel } from '@vitalets/logger';
-import { Robot } from './index.js';
+import { Robot } from '../robot.js';
 
 export abstract class RobotModule {
-  protected logger = new Logger({
-    prefix: `[${this.constructor.name.toLowerCase()}]:`,
-    level: this.config.logLevel as LogLevel,
-  });
+  logger: Logger;
 
-  constructor(protected robot: Robot) { }
+  constructor(protected robot: Robot) {
+    this.logger = new Logger({
+      prefix: `[${this.constructor.name.toLowerCase()}]:`,
+      level: this.robot.config.logLevel as LogLevel,
+    });
+  }
 
   protected get api() { return this.robot.api; }
-  protected get config() { return this.robot.config; }
   protected get account() { return this.robot.account; }
 }

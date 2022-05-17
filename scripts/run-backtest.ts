@@ -3,7 +3,7 @@
  * npx ts-node-esm scripts/run-backtest.ts
  */
 import { Backtest } from 'tinkoff-invest-api';
-import { Robot } from '../src/index.js';
+import { Robot } from '../src/robot.js';
 import { config } from '../src/config.js';
 import { OperationState } from 'tinkoff-invest-api/dist/generated/operations.js';
 

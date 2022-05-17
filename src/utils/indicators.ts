@@ -1,7 +1,7 @@
 /**
  * Расчет индикаторов.
  */
-import { SMA, EMA } from '@debut/indicators';
+import { SMA, EMA, RSI } from '@debut/indicators';
 
 export type Series = number[];
 
@@ -22,6 +22,14 @@ export function ema(prices: Series, length: number) {
 }
 
 /**
+ * Индекс относительной силы, RSI
+ */
+ export function rsi(prices: Series, length: number) {
+  const rsi = new RSI(length);
+  return prices.map(price => rsi.nextValue(price));
+}
+
+/**
  * Возвращает true если source1 пересек source2 сверху вниз
  */
 export function crossover(source1: Series, source2: Series) {
@@ -37,4 +45,11 @@ export function crossunder(source1: Series, source2: Series) {
   const [ prev1, cur1 ] = source1.slice(-2);
   const [ prev2, cur2 ] = source2.slice(-2);
   return cur1 < cur2 && prev1 > prev2;
+}
+
+/**
+ * Возвращает серию из константы.
+ */
+export function toSeries(value: number, length: number): Series {
+  return new Array(length).fill(value);
 }
