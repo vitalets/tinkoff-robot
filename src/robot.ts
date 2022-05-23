@@ -26,7 +26,7 @@ export interface RobotConfig {
 
 const defaults: Pick<RobotConfig, 'dryRun' | 'cacheDir' | 'logLevel'> = {
   dryRun: false,
-  cacheDir: '.candles',
+  cacheDir: '.cache',
   logLevel: 'info',
 };
 
@@ -46,7 +46,7 @@ export class Robot {
     this.account = config.useRealAccount
       ? new RealAccount(api, REAL_ACCOUNT_ID)
       : new SandboxAccount(api, SANDBOX_ACCOUNT_ID);
-    this.candlesLoader = new CandlesLoader(api, { cacheDir: config.cacheDir });
+    this.candlesLoader = new CandlesLoader(api, { cacheDir: this.config.cacheDir });
     this.orders = new Orders(this);
     this.portfolio = new Portfolio(this);
     this.strategies = this.config.strategies.map(strategyConfig => new Strategy(this, strategyConfig));

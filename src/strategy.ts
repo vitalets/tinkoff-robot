@@ -18,7 +18,7 @@ import { LimitOrderReq } from './account/orders.js';
 import { Robot } from './robot.js';
 import { ProfitLossSignal, ProfitLossSignalConfig } from './signals/profit-loss.js';
 import { SmaCrossoverSignal, SmaCrossoverSignalConfig } from './signals/sma-corssover.js';
-import { FigiInstrument } from './instrument.js';
+import { FigiInstrument } from './figi.js';
 import { OrderDirection } from 'tinkoff-invest-api/dist/generated/orders.js';
 import { RsiCrossoverSignal, RsiCrossoverSignalConfig } from './signals/rsi-crossover.js';
 
