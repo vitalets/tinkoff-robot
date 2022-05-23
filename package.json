@@ -10,6 +10,7 @@
     "candles": "ts-node-esm scripts/load-candles.ts",
     "instruments": "ts-node-esm scripts/load-instruments.ts",
     "backtest": "ts-node-esm scripts/run-backtest.ts",
+    "chart": "open chart/index.html",
     "market": "ts-node-esm scripts/run-market.ts",
     "market:real": "ts-node-esm scripts/run-market.ts --real"
   },

@@ -5,6 +5,7 @@
  *
  * Предварительно нужно запустить сервер tinkoff-local-broker.
  */
+import fs from 'fs';
 import MockDate from 'mockdate';
 import { Helpers } from 'tinkoff-invest-api';
 import { Robot } from '../src/robot.js';
@@ -13,8 +14,8 @@ import { OperationState, OperationType } from 'tinkoff-invest-api/dist/generated
 import { backtestApi as api } from './init-api.js';
 
 // Диапазон дат для бэктеста
-const from = new Date('2022-04-29T07:00:00+03:00');
-const to = new Date('2022-04-29T19:00:00+03:00');
+const from = new Date('2022-04-29T10:00:00+03:00');
+const to = new Date('2022-04-29T15:00:00+03:00');
 
 // Для бэктеста оставляем только первую стратегию
 config.strategies = config.strategies.slice(0, 1);
@@ -33,6 +34,7 @@ async function main() {
 
   await showOperations();
   await showExpectedYield();
+  buildCharts(robot);
 }
 
 async function showExpectedYield() {
@@ -88,4 +90,17 @@ async function tick() {
   } else {
     return false;
   }
+}
+
+function buildCharts(robot: Robot) {
+  const strategy = robot.strategies[0];
+  const charts = strategy.smaSignal?.charts;
+  if (!charts) return;
+  const series = Object.keys(charts).map(name => ({ name, data: charts[name] }));
+  const seriesContent = JSON.stringify(series);
+  const tpl = fs.readFileSync('chart/index.tpl.js', 'utf8');
+  const newContent = tpl
+    .replace('%ticker%', strategy.instrument.info?.ticker || strategy.config.figi)
+    .replace('series: []', `series: ${seriesContent}`);
+  fs.writeFileSync('chart/index.js', newContent);
 }

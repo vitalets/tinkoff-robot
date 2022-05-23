@@ -12,3 +12,4 @@ dist
 /.cache
 /todo.txt
 /scripts/run-tuner.ts
+/chart/index.js

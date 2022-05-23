@@ -100,9 +100,12 @@ npm run market:real
 npm run market:real -- --dry-run --cron
 ```
 
-## Статистика
-
 ## Визуализация
+Для визуализации работы стратегии после прогона на исторических данных формируется график сигналов.
+Открыть график можно командой: `npm run chart`
+
+Пример графика
+![image](https://user-images.githubusercontent.com/1473072/169903600-3996ffbb-a980-4578-ae43-e5f2e5205dff.png)
 
 ## Связанные проекты
 * [tinkoff-invest-api](https://github.com/vitalets/tinkoff-invest-api) - Node.js клиент для работы с Tinkoff Invest API

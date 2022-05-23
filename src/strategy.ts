@@ -41,13 +41,13 @@ export interface StrategyConfig {
 }
 
 export class Strategy extends RobotModule {
-  protected instrument: FigiInstrument;
-  protected currentProfit = 0;
+  instrument: FigiInstrument;
+  currentProfit = 0;
 
   // используемые сигналы
-  protected profitSignal?: ProfitLossSignal;
-  protected smaSignal?: SmaCrossoverSignal;
-  protected rsiSignal?: RsiCrossoverSignal;
+  profitSignal?: ProfitLossSignal;
+  smaSignal?: SmaCrossoverSignal;
+  rsiSignal?: RsiCrossoverSignal;
 
   constructor(robot: Robot, public config: StrategyConfig) {
     super(robot);
