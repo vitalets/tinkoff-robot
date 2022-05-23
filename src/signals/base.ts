@@ -15,12 +15,12 @@ export interface SignalParams {
 
 export abstract class Signal<T> {
   logger: Logger;
-  
+
   constructor(protected strategy: Strategy, protected config: T) {
     this.logger = strategy.logger.withPrefix(`[${this.constructor.name}]:`);
   }
 
-  abstract getMinCandlesCount(): number;
+  abstract get minCandlesCount(): number;
   abstract calc(req: SignalParams): SignalResult;
 
   protected getPrices(candles: HistoricCandle[], type: 'close' | 'open' | 'low' | 'high') {

@@ -24,7 +24,7 @@ export class SmaCrossoverSignal extends Signal<SmaCrossoverSignalConfig> {
     super(strategy, Object.assign({}, defaultConfig, config));
   }
 
-  getMinCandlesCount() {
+  get minCandlesCount() {
     return this.config.slowLength + 1;
   }
 

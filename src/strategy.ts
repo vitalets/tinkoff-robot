@@ -21,7 +21,6 @@ import { SmaCrossoverSignal, SmaCrossoverSignalConfig } from './signals/sma-cors
 import { FigiInstrument } from './instrument.js';
 import { OrderDirection } from 'tinkoff-invest-api/dist/generated/orders.js';
 import { RsiCrossoverSignal, RsiCrossoverSignalConfig } from './signals/rsi-crossover.js';
-import { SignalResult } from './signals/base.js';
 
 export interface StrategyConfig {
   /** ID инструмента */
@@ -31,7 +30,7 @@ export interface StrategyConfig {
   /** Комиссия брокера, % от суммы сделки */
   brokerFee: number,
   /** Интервал свечей */
-  interval: CandleInterval.CANDLE_INTERVAL_1_MIN,
+  interval: CandleInterval,
   /** Конфиг сигнала по отклонению текущей цены */
   profit?: ProfitLossSignalConfig,
   /** Конфиг сигнала по скользящим средним */
@@ -90,13 +89,13 @@ export class Strategy extends RobotModule {
    */
   protected calcSignal() {
     const signalParams = { candles: this.instrument.candles, profit: this.currentProfit };
-    const signals: Record<string, SignalResult | void> = {
+    const signals = {
       profit: this.profitSignal?.calc(signalParams),
       rsi: this.rsiSignal?.calc(signalParams),
       sma: this.smaSignal?.calc(signalParams),
     };
-    this.logger.log(`Сигналы: ${Object.keys(signals).map(k => `${k}=${signals[k] || 'wait'}`).join(', ')}`);
-    // todo: здесь может быть более сложная логика комбинации нескольких сигналов.
+    this.logSignals(signals);
+    // todo: здесь может быть более сложная логика комбинации сигналов.
     return signals.profit || signals.rsi || signals.sma;
   }
 
@@ -195,9 +194,15 @@ export class Strategy extends RobotModule {
    */
   protected calcRequiredCandlesCount() {
     const minCounts = [
-      this.profitSignal?.getMinCandlesCount() || 0,
-      this.smaSignal?.getMinCandlesCount() || 0,
+      this.profitSignal?.minCandlesCount || 0,
+      this.smaSignal?.minCandlesCount || 0,
+      this.rsiSignal?.minCandlesCount || 0,
     ];
     return Math.max(...minCounts);
+  }
+
+  protected logSignals(signals: Record<string, unknown>) {
+    const time = this.instrument.candles[this.instrument.candles.length - 1].time?.toLocaleString();
+    this.logger.warn(`Сигналы: ${Object.keys(signals).map(k => `${k}=${signals[k] || 'wait'}`).join(', ')} (${time})`);
   }
 }

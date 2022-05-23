@@ -25,7 +25,7 @@ export class RsiCrossoverSignal extends Signal<RsiCrossoverSignalConfig> {
     super(strategy, Object.assign({}, defaultConfig, config));
   }
 
-  getMinCandlesCount() {
+  get minCandlesCount() {
     return this.config.period + 1;
   }
 

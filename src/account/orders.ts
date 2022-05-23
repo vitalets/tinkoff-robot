@@ -16,6 +16,10 @@ export type LimitOrderReq = Pick<PostOrderRequest, 'figi' | 'direction' | 'quant
 export class Orders extends RobotModule {
   items: OrderState[] = [];
 
+  private get dryRunStr() {
+    return this.robot.config.dryRun ? 'DRY_RUN ' : '';
+  }
+
   /**
    * Загружаем существующие заявки
    */
@@ -29,7 +33,7 @@ export class Orders extends RobotModule {
    * Создаем новую лимит-заявку
    */
   async postLimitOrder({ figi, direction, quantity, price }: LimitOrderReq) {
-    const order = await this.account.postOrder({
+    const order = this.robot.config.dryRun ? null : await this.account.postOrder({
       figi,
       quantity,
       direction,
@@ -38,7 +42,8 @@ export class Orders extends RobotModule {
       orderId: randomUUID(),
     });
     const action = direction === OrderDirection.ORDER_DIRECTION_BUY ? 'покупку' : 'продажу';
-    this.logger.warn(`Создана заявка на ${action}: лотов ${quantity}, цена ${this.api.helpers.toNumber(price)}`);
+    const priceNum = this.api.helpers.toNumber(price);
+    this.logger.warn(`${this.dryRunStr}Создана заявка на ${action}: лотов ${quantity}, цена ${priceNum}`);
     return order;
   }
 
@@ -49,8 +54,9 @@ export class Orders extends RobotModule {
     const existingOrders = this.items.filter(order => order.figi === figi);
     const tasks = existingOrders.map(async order => {
       const prevPrice = this.api.helpers.toNumber(order.initialSecurityPrice);
-      this.logger.log(`Отмена предыдущей заявки ${order.orderId}, цена ${prevPrice}`);
-      await this.account.cancelOrder(order.orderId);
+      const { dryRun } = this.robot.config;
+      this.logger.warn(`${this.dryRunStr}Отмена предыдущей заявки ${order.orderId}, цена ${prevPrice}`);
+      if (!dryRun) await this.account.cancelOrder(order.orderId);
     });
     await Promise.all(tasks);
   }

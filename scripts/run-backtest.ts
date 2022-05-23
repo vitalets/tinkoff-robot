@@ -1,45 +1,49 @@
 /**
  * Бэктест стратегии на исторических свечах:
  * npx ts-node-esm scripts/run-backtest.ts
+ * DEBUG=tinkoff-invest-api:* npx ts-node-esm scripts/run-backtest.ts
  */
-import { Backtest } from 'tinkoff-invest-api';
+import { Backtest, Helpers } from 'tinkoff-invest-api';
 import { Robot } from '../src/robot.js';
 import { config } from '../src/config.js';
-import { OperationState } from 'tinkoff-invest-api/dist/generated/operations.js';
+import { OperationState, OperationType } from 'tinkoff-invest-api/dist/generated/operations.js';
+
+const strategyConfig = config.strategies[0];
 
 const backtest = new Backtest({
-  candles: [
-    'data/candles/BBG004730N88/5_min/2022-05-11.json',
-    'data/candles/BBG004730N88/5_min/2022-05-12.json',
-  ],
-  instruments: { shares: 'data/shares.json'},
-  initialCandleIndex: config.slowLength,
-  initialCapital: 100_000,
+  token: process.env.TINKOFF_API_TOKEN!,
+  candleInterval: strategyConfig.interval,
+  ...Helpers.fromTo('1d', new Date('2022-05-18T10:00:00+03:00')),
 });
 
 main();
 
 async function main() {
   console.warn(`Бэктест стратегии на исторических свечах...`);
-  const robot = new Robot(backtest.api, {...config, logLevel: 'warn' });
-  while (await backtest.tick()) {
-    await robot.tick();
-  }
-  const finalCapital = await backtest.getCapital();
-  const profit = finalCapital - backtest.options.initialCapital;
-  console.warn(`Капитал: ${finalCapital.toFixed(2)} (${profit > 0 ? '+' : ''}${profit.toFixed(2)} rub)`);
+  const robot = new Robot(backtest.api, {...config, logLevel: 'info' });
 
+  while (await backtest.tick()) {
+    await robot.runOnce();
+  }
+
+  await showExpectedYield();
   await showOperations();
 }
 
-export async function showOperations() {
+async function showExpectedYield() {
+  const { expectedYield } = await backtest.api.operations.getPortfolio({ accountId: '' });
+  console.log(`Прибыль: ${Helpers.toNumber(expectedYield)}%`);
+}
+
+async function showOperations() {
   console.log(`Операции:`);
   const { operations } = await backtest.operations.getOperations({
-    figi: config.figi,
+    figi: strategyConfig.figi,
     state: OperationState.OPERATION_STATE_EXECUTED,
     accountId: ''
   });
   operations
+    .filter(o => o.operationType !== OperationType.OPERATION_TYPE_BROKER_FEE)
     .forEach(o => {
     const s = [
       ' '.repeat(4),

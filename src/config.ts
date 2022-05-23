@@ -7,15 +7,13 @@ import { RobotConfig } from './robot.js';
 export const config: RobotConfig = {
   /** Используем реальный счет или песочницу */
   useRealAccount: false,
-  /** Директория для кеширования свечей */
-  cacheDir: '.candles',
   /** Уровень логирования */
   logLevel: 'info',
   /** Используемые стратегии: */
   strategies: [
     {
       /** ID инструмента */
-      figi: 'BBG004730N88',
+      figi: 'BBG004731354',
       /** По сколько лотов покупаем/продаем */
       orderLots: 1,
       /** Комиссия брокера, % от суммы сделки */

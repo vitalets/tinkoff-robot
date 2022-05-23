@@ -4,20 +4,26 @@
  * В песочнице (по умолчанию):
  * npx ts-node-esm scripts/run-market.ts
  *
- * На реальном счете:
+ * На реальном счете (без создания заявок):
+ * npx ts-node-esm scripts/run-market.ts --real --dry-run
+ *
+ * На реальном счете (с созданием заявок):
  * npx ts-node-esm scripts/run-market.ts --real
- */
+  */
 import { api } from './init-api.js';
 import { Robot } from '../src/robot.js';
 import { config } from '../src/config.js';
 
-const useRealAccount = process.argv.some(a => a === '--real');
+const cliFlags = {
+  useRealAccount: process.argv.some(a => a === '--real'),
+  dryRun: process.argv.some(a => a === '--dry-run'),
+};
 const intervalMinutes = 1;
 
 main();
 
 async function main() {
-  const finalConfig = { ...config, useRealAccount };
+  const finalConfig = { ...config, ...cliFlags };
   const robot = new Robot(api, finalConfig);
   while (true) {
     await robot.runOnce();

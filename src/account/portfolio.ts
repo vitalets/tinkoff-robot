@@ -44,12 +44,13 @@ export class Portfolio extends RobotModule {
   private logPositions() {
     this.logger.log(`Позиции загружены: ${this.positions.length}`);
     this.positions.forEach(p => {
+      const expectedYield = this.api.helpers.toNumber(p.expectedYield) || 0;
       const s = [
         ' '.repeat(4),
         p.figi,
         `${this.api.helpers.toNumber(p.quantity)}`,
-        p.averagePositionPrice && ` x ${this.api.helpers.toNumber(p.averagePositionPrice)}`,
-        p.expectedYield && `(${this.api.helpers.toNumber(p.expectedYield)}`,
+        p.averagePositionPrice && `x ${this.api.helpers.toNumber(p.averagePositionPrice)}`,
+        p.expectedYield && `(${expectedYield > 0 ? '+' : ''}${expectedYield})`,
       ].filter(Boolean).join(' ');
       this.logger.log(s);
     });

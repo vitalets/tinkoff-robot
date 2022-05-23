@@ -2,7 +2,6 @@
  * Класс работы с конкретным инструментом по figi.
  */
 import { Logger } from '@vitalets/logger';
-import { Helpers } from 'tinkoff-invest-api';
 import { SecurityTradingStatus } from 'tinkoff-invest-api/dist/generated/common.js';
 import { Instrument, InstrumentIdType } from 'tinkoff-invest-api/dist/generated/instruments.js';
 import { HistoricCandle } from 'tinkoff-invest-api/dist/generated/marketdata.js';
@@ -16,7 +15,7 @@ export class FigiInstrument extends RobotModule {
 
   constructor(protected robot: Robot, public figi: string) {
     super(robot);
-    this.logger = new Logger({ prefix: `[figi ${figi}]:`, level: robot.logger.level });
+    this.logger = new Logger({ prefix: `[instrument]:`, level: robot.logger.level });
   }
 
   /**
@@ -45,17 +44,10 @@ export class FigiInstrument extends RobotModule {
    * Загружаем свечи.
    */
   async loadCandles(req: Pick<CandlesReqParams, 'interval' | 'minCount'>) {
-    this.logger.log(`Загружаю свечи для ${this.info?.ticker} ...`);
+    this.logger.log(`Загружаю ${req.minCount} свечей для ${this.info?.ticker} ...`);
     const { candles } = await this.robot.candlesLoader.getCandles({ figi: this.figi, ...req });
     this.candles = candles;
     this.logger.log(`Свечи загружены: ${candles.length}, текущая цена: ${this.getCurrentPrice()}`);
-  }
-
-  /**
-   * Массив цен свечей.
-   */
-  getPrices(type: 'close' | 'open' | 'low' | 'high') {
-    return this.candles.map(candle => Helpers.toNumber(candle[type]!));
   }
 
   /**

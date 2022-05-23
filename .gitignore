@@ -9,6 +9,6 @@ npm-debug.log
 .env*
 
 dist
-data
+/.cache
 /todo.txt
 /scripts/run-tuner.ts

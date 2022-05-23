@@ -20,7 +20,7 @@ export class ProfitLossSignal extends Signal<ProfitLossSignalConfig> {
     super(strategy, Object.assign({}, defaultConfig, config));
   }
 
-  getMinCandlesCount() {
+  get minCandlesCount() {
     return 1;
   }
 

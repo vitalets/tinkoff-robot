@@ -14,6 +14,8 @@ const { REAL_ACCOUNT_ID = '', SANDBOX_ACCOUNT_ID = '' } = process.env;
 export interface RobotConfig {
   /** Используем реальный счет или песочницу */
   useRealAccount: boolean,
+  /** Запуск без создания заявок */
+  dryRun?: boolean;
   /** Директория для кеширования свечей */
   cacheDir?: string,
   /** Уровень логирования */
@@ -22,7 +24,8 @@ export interface RobotConfig {
   strategies: StrategyConfig[],
 }
 
-const defaults: Pick<RobotConfig, 'cacheDir' | 'logLevel'> = {
+const defaults: Pick<RobotConfig, 'dryRun' | 'cacheDir' | 'logLevel'> = {
+  dryRun: false,
   cacheDir: '.candles',
   logLevel: 'info',
 };
