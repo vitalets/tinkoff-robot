@@ -11,6 +11,7 @@
     "instruments": "ts-node-esm scripts/load-instruments.ts",
     "backtest": "ts-node-esm scripts/run-backtest.ts",
     "chart": "open chart/index.html",
+    "toc": "markdown-toc README.md -i",
     "market": "ts-node-esm scripts/run-market.ts",
     "market:real": "ts-node-esm scripts/run-market.ts --real"
   },
@@ -31,6 +32,7 @@
     "eslint": "^8.16.0",
     "eslint-plugin-mocha": "^10.0.3",
     "lint-staged": "^12.3.3",
+    "markdown-toc": "^1.2.0",
     "mocha": "^10.0.0",
     "ts-node": "^10.8.0",
     "typescript": "^4.6.4"
