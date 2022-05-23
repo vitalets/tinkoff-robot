@@ -10,8 +10,11 @@ import { Helpers } from 'tinkoff-invest-api';
 import { Robot } from '../src/robot.js';
 import { config } from '../src/config.js';
 import { OperationState, OperationType } from 'tinkoff-invest-api/dist/generated/operations.js';
-import { CandleInterval } from 'tinkoff-invest-api/dist/generated/marketdata.js';
 import { backtestApi as api } from './init-api.js';
+
+// Диапазон дат для бэктеста
+const from = new Date('2022-04-29T07:00:00+03:00');
+const to = new Date('2022-04-29T19:00:00+03:00');
 
 // Для бэктеста оставляем только первую стратегию
 config.strategies = config.strategies.slice(0, 1);
@@ -20,11 +23,7 @@ const strategyConfig = config.strategies[0];
 main();
 
 async function main() {
-  await configureBroker({
-    from: new Date('2022-04-29T10:00:00+03:00'),
-    to: new Date('2022-04-29T19:00:00+03:00'),
-    candleInterval: CandleInterval.CANDLE_INTERVAL_1_MIN,
-  });
+  await configureBroker({ from, to, candleInterval: strategyConfig.interval });
 
   const robot = new Robot(api, { ...config, logLevel: 'info' });
 
@@ -32,8 +31,8 @@ async function main() {
     await robot.runOnce();
   }
 
-  await showExpectedYield();
   await showOperations();
+  await showExpectedYield();
 }
 
 async function showExpectedYield() {
