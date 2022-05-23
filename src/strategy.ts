@@ -21,6 +21,7 @@ import { SmaCrossoverSignal, SmaCrossoverSignalConfig } from './signals/sma-cors
 import { FigiInstrument } from './figi.js';
 import { OrderDirection } from 'tinkoff-invest-api/dist/generated/orders.js';
 import { RsiCrossoverSignal, RsiCrossoverSignalConfig } from './signals/rsi-crossover.js';
+import { Logger } from '@vitalets/logger';
 
 export interface StrategyConfig {
   /** ID инструмента */
@@ -50,6 +51,7 @@ export class Strategy extends RobotModule {
 
   constructor(robot: Robot, public config: StrategyConfig) {
     super(robot);
+    this.logger = new Logger({ prefix: `[strategy_${config.figi}]:`, level: robot.logger.level });
     this.instrument = new FigiInstrument(robot, this.config.figi);
     if (config.profit) this.profitSignal = new ProfitLossSignal(this, config.profit);
     if (config.sma) this.smaSignal = new SmaCrossoverSignal(this, config.sma);

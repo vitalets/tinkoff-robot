@@ -15,7 +15,7 @@ export class FigiInstrument extends RobotModule {
 
   constructor(protected robot: Robot, public figi: string) {
     super(robot);
-    this.logger = new Logger({ prefix: `[instrument]:`, level: robot.logger.level });
+    this.logger = new Logger({ prefix: `[instrument_${figi}]:`, level: robot.logger.level });
   }
 
   /**
