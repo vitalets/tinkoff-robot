@@ -29,7 +29,7 @@ function getStrategyConfig(figi: string): StrategyConfig {
     /** Комиссия брокера, % от суммы сделки */
     brokerFee: 0.3,
     /** Интервал свечей */
-    interval: CandleInterval.CANDLE_INTERVAL_1_MIN,
+    interval: CandleInterval.CANDLE_INTERVAL_5_MIN,
     /** Конфиг сигнала по отклонению текущей цены */
     profit: {
       /** При каком % превышении цены продаем актив, чтобы зафиксировать прибыль */

@@ -2,6 +2,7 @@
  * Класс работы с заявками.
  */
 import { randomUUID } from 'crypto';
+import { Status, ClientError } from 'nice-grpc';
 import {
   OrderDirection,
   OrderExecutionReportStatus,
@@ -56,7 +57,15 @@ export class Orders extends RobotModule {
       const prevPrice = this.api.helpers.toNumber(order.initialSecurityPrice);
       const { dryRun } = this.robot.config;
       this.logger.warn(`${this.dryRunStr}Отмена предыдущей заявки ${order.orderId}, цена ${prevPrice}`);
-      if (!dryRun) await this.account.cancelOrder(order.orderId);
+      try {
+        if (!dryRun) await this.account.cancelOrder(order.orderId);
+      } catch (e) {
+        if (e instanceof ClientError && e.code === Status.NOT_FOUND) {
+          this.logger.warn(e.message);
+        } else {
+          throw e;
+        }
+      }
     });
     await Promise.all(tasks);
   }
