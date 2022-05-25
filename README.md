@@ -148,8 +148,8 @@ npm run deploy
 ```
 
 ## Связанные проекты
-* [tinkoff-invest-api](https://github.com/vitalets/tinkoff-invest-api) - Node.js клиент для работы с Tinkoff Invest API
-* [tinkoff-local-broker](https://github.com/vitalets/tinkoff-local-broker) - Сервер для тестирования торговых роботов на Tinkoff Invest API
+* [tinkoff-invest-api](https://github.com/vitalets/tinkoff-invest-api) - Node.js SDK для работы с Tinkoff Invest API
+* [tinkoff-local-broker](https://github.com/vitalets/tinkoff-local-broker) - Локальный сервер для тестирования торговых роботов
 * [debut-js/Indicators](https://github.com/debut-js/Indicators) - Расчет индикаторов
 
 ## Лицензия
