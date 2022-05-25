@@ -17,6 +17,7 @@
 - [Запуск на исторических данных](#%D0%B7%D0%B0%D0%BF%D1%83%D1%81%D0%BA-%D0%BD%D0%B0-%D0%B8%D1%81%D1%82%D0%BE%D1%80%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B8%D1%85-%D0%B4%D0%B0%D0%BD%D0%BD%D1%8B%D1%85)
 - [Запуск на рыночных данных](#%D0%B7%D0%B0%D0%BF%D1%83%D1%81%D0%BA-%D0%BD%D0%B0-%D1%80%D1%8B%D0%BD%D0%BE%D1%87%D0%BD%D1%8B%D1%85-%D0%B4%D0%B0%D0%BD%D0%BD%D1%8B%D1%85)
 - [Визуализация](#%D0%B2%D0%B8%D0%B7%D1%83%D0%B0%D0%BB%D0%B8%D0%B7%D0%B0%D1%86%D0%B8%D1%8F)
+- [Деплой](#%D0%B4%D0%B5%D0%BF%D0%BB%D0%BE%D0%B9)
 - [Связанные проекты](#%D1%81%D0%B2%D1%8F%D0%B7%D0%B0%D0%BD%D0%BD%D1%8B%D0%B5-%D0%BF%D1%80%D0%BE%D0%B5%D0%BA%D1%82%D1%8B)
 - [Лицензия](#%D0%BB%D0%B8%D1%86%D0%B5%D0%BD%D0%B7%D0%B8%D1%8F)
 
@@ -128,6 +129,19 @@ npm run chart
 
 Пример графика:
 ![image](https://user-images.githubusercontent.com/1473072/169903600-3996ffbb-a980-4578-ae43-e5f2e5205dff.png)
+
+## Деплой
+Деплой робота в виде serverless-функции на [Яндекс.Облако](https://cloud.yandex.ru/), запускаемой по расписанию каждые 5 минут:
+
+1. Установите и настройте [yc-cli](https://cloud.yandex.ru/docs/cli/quickstart)
+2. [Создайте сервисный аккаунт](https://cloud.yandex.ru/docs/iam/operations/sa/create) `tinkoff-robot-sa` и выдайте ему роль `serverless.functions.invoker`
+3. Запустите деплой функции:
+   ```bash
+   npm run deploy
+   ```
+4. [Создайте триггер](https://cloud.yandex.ru/docs/functions/concepts/trigger/timer) типа таймер с cron-выражением `0/5 7-16 ? * 2-6 *` и укажите ему функцию `tinkoff-robot`
+
+В последующем для деплоя новой версии функции достаточно вызывать только `npm run deploy`.
 
 ## Связанные проекты
 * [tinkoff-invest-api](https://github.com/vitalets/tinkoff-invest-api) - Node.js клиент для работы с Tinkoff Invest API
