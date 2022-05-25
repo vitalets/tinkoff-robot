@@ -11,7 +11,7 @@ module.exports = {
     handler: 'dist/serverless/cjs/index.handler',
     runtime: 'nodejs16',
     timeout: 5,
-    memory: 256,
+    memory: 128,
     account: 'tinkoff-robot-sa',
     environment: {
       NODE_ENV: 'production',
