@@ -1,5 +1,5 @@
 # tinkoff-robot
-Пример торгового робота для [Tinkoff Invest Api v2](https://tinkoff.github.io/investAPI/) на Node.js.
+Пример торгового робота на Node.js с использованием [Tinkoff Invest Api v2](https://tinkoff.github.io/investAPI/).
 
 * использует комбинацию нескольких сигналов
 * работает одновременно с несколькими figi
