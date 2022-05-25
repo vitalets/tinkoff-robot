@@ -131,17 +131,21 @@ npm run chart
 ![image](https://user-images.githubusercontent.com/1473072/169903600-3996ffbb-a980-4578-ae43-e5f2e5205dff.png)
 
 ## Деплой
-Деплой робота в виде serverless-функции на [Яндекс.Облако](https://cloud.yandex.ru/), запускаемой по расписанию каждые 5 минут:
+Деплой робота в виде serverless-функции на [Яндекс.Облако](https://cloud.yandex.ru/), запускаемой по расписанию:
 
 1. Установите и настройте [yc-cli](https://cloud.yandex.ru/docs/cli/quickstart)
-2. [Создайте сервисный аккаунт](https://cloud.yandex.ru/docs/iam/operations/sa/create) `tinkoff-robot-sa` и выдайте ему роль `serverless.functions.invoker`
+2. Создайте [сервисный аккаунт](https://cloud.yandex.ru/docs/iam/operations/sa/create) `tinkoff-robot-sa` и выдайте ему роль `serverless.functions.invoker`
 3. Запустите деплой функции:
    ```bash
    npm run deploy
    ```
-4. [Создайте триггер](https://cloud.yandex.ru/docs/functions/concepts/trigger/timer) типа таймер с cron-выражением `0/5 7-16 ? * 2-6 *` и укажите ему функцию `tinkoff-robot`
+4. Создайте [триггер типа таймер](https://cloud.yandex.ru/docs/functions/concepts/trigger/timer) с cron-выражением `0/5 7-16 ? * 2-6 *` - запуск **каждые 5 минут с 10 до 19 (msk) по будням**. В качестве функции укажите триггеру `tinkoff-robot`
+5. Проверьте в логах функции, что вызовы происходят
 
-В последующем для деплоя новой версии функции достаточно вызывать только `npm run deploy`.
+В последующем для деплоя новой версии достаточно вызвать:
+```
+npm run deploy
+```
 
 ## Связанные проекты
 * [tinkoff-invest-api](https://github.com/vitalets/tinkoff-invest-api) - Node.js клиент для работы с Tinkoff Invest API
