@@ -57,10 +57,11 @@ export class Robot {
    * Подходит для запуска по расписанию.
    */
   async runOnce() {
-    this.logger.log(`Запуск робота (${this.config.useRealAccount ? 'боевой счет' : 'песочница'})`);
+    this.logger.log(`Вызов робота (${this.config.useRealAccount ? 'боевой счет' : 'песочница'})`);
     await this.portfolio.load();
     await this.orders.load();
     await this.runStrategies();
+    this.logger.log(`Вызов робота завершен`);
   }
 
   // todo: Запуск робота в режиме стрима.
