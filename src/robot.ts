@@ -2,7 +2,6 @@
  * Входная точка для торгового робота.
  * Робот запускает параллельно несколько стратегий, переданных в конфиге.
  */
-import 'dotenv/config';
 import { CandlesLoader, RealAccount, SandboxAccount, TinkoffAccount, TinkoffInvestApi } from 'tinkoff-invest-api';
 import { Logger, LogLevel } from '@vitalets/logger';
 import { Strategy, StrategyConfig } from './strategy.js';
